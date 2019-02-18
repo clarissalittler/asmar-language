@@ -26,7 +26,7 @@ The syntax is fairly simple. Let's look at an example first. This program calcul
 Here's the general syntax of Asmar in roughly BNF syntax---although it's really just the Haskell datatype
 
        data Inst = Add Reg Reg Reg
-       	    	  | AddI Int Reg Reg
+                  | AddI Int Reg Reg
 		  | Sub Reg Reg Reg
 		  | SubI Int Reg Reg
 		  | Div Reg Reg Reg
