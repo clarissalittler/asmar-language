@@ -221,6 +221,29 @@ evalProgram = do
 	then evalProgram
 	else incCounter >> evalProgram
 
+printState :: ASM ()
+printState = do
+  ASMState pc is rs ms _ <- get
+  liftIO $ do
+    putStrLn $ "On instruction: " ++ (show pc)
+    putStrLn $ "Registers: " ++ (show rs)
+
+evalProgStep :: ASM ()
+evalProgStep = do
+  ASMState pc is _ _ _ <- get
+  if pc >= length is
+    then liftIO $ putStrLn "Program has finished"
+    else do
+      executeInst (is !! pc)
+      printState
+      pc' <- gets programCounter
+      k <- liftIO getLine
+      case k of
+        "q" -> liftIO $ putStrLn "Exiting!"
+        _   -> if pc' /= pc
+                  then evalProgStep
+                  else incCounter >> evalProgStep
+
 initState :: [Inst] -> (Label -> Int) -> ASMState
 initState code labs = ASMState 0 code (V.replicate 16 0) (V.replicate 100 0) labs
 
@@ -229,3 +252,9 @@ runProgram f = do
   insts <- readFile f
   let (code,labs) = parseInstructions insts
   evalStateT evalProgram (initState code labs)
+
+runProgramStep :: String -> IO ()
+runProgramStep f = do
+  insts <- readFile f
+  let (code,labs) = parseInstructions insts
+  evalStateT evalProgStep (initState code labs)
