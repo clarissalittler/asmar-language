@@ -2,6 +2,7 @@ import Control.Monad.State
 import Data.Vector ((!),(//),Vector)
 import qualified Data.Vector as V
 import System.IO
+import System.Environment
 
 
 numOfRegisters = 16
@@ -17,8 +18,6 @@ data ASMState = ASMState {programCounter :: Int,
 			  registers:: Vector Int,
 			  memory :: Vector Int,
 			  labels :: Label -> Int}
-
-
 
 data Inst = Add Reg Reg Reg
 	  | AddI Int Reg Reg
@@ -258,3 +257,12 @@ runProgramStep f = do
   insts <- readFile f
   let (code,labs) = parseInstructions insts
   evalStateT evalProgStep (initState code labs)
+
+main :: IO ()
+main = do
+  args <- getArgs
+  case args of
+    [] -> putStrLn "Need to provide a file name"
+    [f] -> runProgram f
+    ["--step",f] -> runProgramStep f
+    otherwise -> putStrLn "Wrong number of arguments"
